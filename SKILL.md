@@ -8,16 +8,6 @@ allowed-tools: Read, Write, Bash, Glob, Grep, Agent, AskUserQuestion
 
 # Slides — Single-File HTML Presentation Builder
 
-## Dependencies
-
-On first run, ensure [impeccable.style](https://impeccable.style/) is installed — it provides the design polish pass (`/polish`, `/animate`) that runs as the final step of every build.
-
-```bash
-npx skills add pbakaus/impeccable
-```
-
-If this fails or the user declines, the skill still works — skip the polish step and note that output quality could be improved with impeccable installed.
-
 ## Context Assessment
 
 Before doing anything, assess what context already exists. Do NOT follow a rigid step-by-step wizard. Figure out what you have, what you need, and fill the gaps.
@@ -162,6 +152,8 @@ Read `references/example-output.md` **before building your first deck in a sessi
 
 Single self-contained `.html` file. Styles in `<style>`, scripts in `<script>`, libraries via CDN.
 
+**Content sanitization:** When interpolating user-provided text into slides, escape `<script>`, `</style>`, and raw HTML tags in body content to prevent accidental breakage of the document structure.
+
 ### Structure (follow this exactly)
 
 ```html
@@ -290,12 +282,12 @@ After writing the HTML file, verify before telling the user it's done:
 
 3. **If issues found** — fix them and re-read. Do not proceed until validation passes.
 
-4. **Design polish pass** (if impeccable is installed):
-   - Run `/polish` on the generated HTML file — fixes alignment, spacing, consistency
-   - Run `/animate` — reviews and enhances animations with purposeful motion
-   - Run `/delight` — adds moments of personality and unexpected touches
-   - These run on the actual file, not in conversation. They modify the HTML directly.
-   - If impeccable is not installed, skip this step.
+4. **Design polish pass** (optional — ask the user):
+   - Offer: "Want me to run a polish pass to refine the design?"
+   - If yes, invoke `/polish` on the generated HTML file — fixes alignment, spacing, consistency
+   - Then `/animate` — reviews and enhances animations with purposeful motion
+   - Then `/delight` — adds moments of personality and unexpected touches
+   - If the user declines or wants the file as-is, skip this step.
 
 5. **Tell the user:**
    - The file path
@@ -327,7 +319,7 @@ While building, ensure:
 
 ### Polish pass
 
-The `/polish`, `/animate`, and `/delight` steps in validation (step 4) handle the final design upgrade automatically via impeccable.
+The `/polish`, `/animate`, and `/delight` skills in validation (step 4) can elevate the design further — offer them to the user after the initial build.
 
 For advanced GSAP usage beyond what's in `references/animations.md`, the official GSAP skill provides deeper guidance on timelines, ScrollTrigger, and complex sequences.
 
