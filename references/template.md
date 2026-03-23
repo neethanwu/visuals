@@ -149,47 +149,14 @@ Everything else — typography, spacing, colors, layouts, animations, navigation
 
 The following patterns are NOT fixed code. The agent generates the appropriate version based on the deck's style and content needs. These are reference patterns to draw from.
 
-### Keyboard & Scroll Navigation
+### Navigation + Entrance Animations + Fragments (Unified)
 
-Generate when: always (every deck needs basic navigation).
+These three features share one IntersectionObserver and one keydown handler. The agent generates them as a single integrated block — never as separate pieces.
 
-```js
-// Minimal keyboard navigation
-document.addEventListener('keydown', (e) => {
-  const slides = document.querySelectorAll('.slide');
-  const current = Math.round(window.scrollY / window.innerHeight);
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
-    e.preventDefault();
-    slides[Math.min(current + 1, slides.length - 1)]?.scrollIntoView({ behavior: 'smooth' });
-  }
-  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
-    e.preventDefault();
-    slides[Math.max(current - 1, 0)]?.scrollIntoView({ behavior: 'smooth' });
-  }
-});
-```
-
-The agent should adapt this based on the deck — add touch/swipe detection for mobile-focused decks, add Home/End key support for longer decks, etc.
-
-### Entrance Animations
-
-Generate when: most decks benefit from entrance animations. Skip only for the most minimal/restrained styles.
-
-The trigger mechanism is `IntersectionObserver`. When a slide enters the viewport, its children animate in:
-
-```js
-// Observe slides, add .visible when they enter viewport
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) entry.target.classList.add('visible');
-  });
-}, { threshold: 0.3 });
-
-document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
-```
+**CSS for entrance animations and fragments:**
 
 ```css
-/* Elements with .reveal start hidden, animate when parent .slide gets .visible */
+/* Entrance animations — fire when slide becomes visible */
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease, transform 0.5s ease; }
 .slide.visible .reveal { opacity: 1; transform: translateY(0); }
 
@@ -197,13 +164,57 @@ document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
 .reveal:nth-child(2) { transition-delay: 0.1s; }
 .reveal:nth-child(3) { transition-delay: 0.2s; }
 .reveal:nth-child(4) { transition-delay: 0.3s; }
+
+/* Fragments — hidden until revealed by user interaction */
+.fragment { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; }
+.fragment.visible { opacity: 1; transform: translateY(0); }
 ```
 
-The agent varies the animation type per style — see `animations.md` for the full palette of entrance animations (fade-up, scale-in, slide-left, blur-in, etc.) and style-to-animation mapping.
+The agent varies animation type per style — see `animations.md` for fade-up, scale-in, slide-left, blur-in, etc.
 
-### Fragment Support (Within-Slide Reveals)
+**JS — one observer, one keydown handler:**
 
-Generate when: content needs click-to-reveal (lecture-style bullet reveals, step-by-step builds).
+```js
+const slides = document.querySelectorAll('.slide');
+let currentIndex = 0;
+
+// Single observer: tracks current slide + triggers entrance animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      currentIndex = [...slides].indexOf(entry.target);
+    }
+  });
+}, { threshold: 0.5 });
+slides.forEach(slide => observer.observe(slide));
+
+// Single keydown handler: fragments first, then navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    // Check for unrevealed fragments on current slide first
+    const currentSlide = slides[currentIndex];
+    const nextFragment = currentSlide?.querySelector('.fragment:not(.visible)');
+    if (nextFragment) {
+      nextFragment.classList.add('visible');
+      return; // reveal fragment, don't advance slide
+    }
+    // No more fragments — advance to next slide
+    slides[Math.min(currentIndex + 1, slides.length - 1)]?.scrollIntoView({ behavior: 'smooth' });
+  }
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    slides[Math.max(currentIndex - 1, 0)]?.scrollIntoView({ behavior: 'smooth' });
+  }
+});
+```
+
+**Important:** Do NOT calculate the current slide from `scrollY / innerHeight` — this is unreliable with scroll-snap. Always track via IntersectionObserver.
+
+The agent adapts this per deck — add touch/swipe for mobile, Home/End for longer decks, skip fragment logic if no fragments exist.
+
+**Fragment HTML pattern:**
 
 ```html
 <div class="slide" id="slide-3">
@@ -215,33 +226,6 @@ Generate when: content needs click-to-reveal (lecture-style bullet reveals, step
   </div>
 </div>
 ```
-
-```css
-.fragment { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease, transform 0.4s ease; }
-.fragment.visible { opacity: 1; transform: translateY(0); }
-```
-
-```js
-// Fragment handler — reveals next .fragment on click/space/arrow
-// Only advances to next slide when all fragments on current slide are revealed
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
-    const currentSlide = document.querySelector('.slide.visible') ||
-      document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2)?.closest('.slide');
-    if (!currentSlide) return;
-
-    const nextFragment = currentSlide.querySelector('.fragment:not(.visible)');
-    if (nextFragment) {
-      e.preventDefault();
-      nextFragment.classList.add('visible');
-      return; // don't advance slide
-    }
-    // No more fragments — let normal navigation proceed
-  }
-});
-```
-
-The agent should integrate this with the keyboard navigation — the two work together. When fragments exist on a slide, navigation keys reveal fragments first, then advance.
 
 ### Progress Bar
 
