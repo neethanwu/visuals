@@ -12,15 +12,9 @@ args:
 
 ## MANDATORY PREPARATION
 
-Before any design or build work, complete these steps in order:
+Before building anything, confirm you have sufficient context: content (or topic), audience/tone, and whether brand assets are involved. If any of these are unclear, STOP and use `AskUserQuestion` to clarify before proceeding.
 
-1. **Read `reference/template.md`** — the HTML skeleton, structural CSS, and agent-generated patterns. This is the foundation for every deck.
-2. **Gather context** — assess what exists (see Context Assessment below). Identify content, audience, tone, and any brand assets.
-3. **Read `reference/font-guide.md`** — pick the right font trio for the chosen style. Do not hardcode fonts from style files.
-4. **Read the chosen style file** from `reference/styles/` — apply its Color Palette, Typography, Design Principles, and Slide Application Notes.
-5. **Assess what references the deck needs** — does the content include data (→ `reference/data-viz.md`), images (→ `reference/media.md`), code (→ `reference/elements.md`), effects (→ `reference/effects.md`)? Load relevant references before building, not after.
-
-If context is unclear after step 2, STOP and use `AskUserQuestion` to clarify before proceeding.
+Read `reference/template.md` before building your first deck in a session.
 
 ## Architecture
 
