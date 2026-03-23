@@ -1,27 +1,39 @@
 ---
 name: slides
 description: Builds beautiful single-file HTML presentations with professional design, animations, and interactive effects. Triggers when the user wants to create slides, a presentation, a deck, a pitch deck, a talk, a keynote, or a lecture. Activates on "make slides", "build a presentation", "slide deck", "create a deck", "presentation about", "slides for my talk", "pitch deck for", "turn this into slides", "present this", "/slides". Also triggers when user has accumulated content (notes, outlines, research) and wants it turned into a visual presentation.
-argument-hint: [topic or content]
-effort: high
-allowed-tools: Read, Write, Bash, Glob, Grep, Agent, AskUserQuestion
+user-invocable: true
+args:
+  - name: topic
+    description: The topic, content, or file path to build slides from
+    required: false
 ---
 
 # Slides — Single-File HTML Presentation Builder
 
+## MANDATORY PREPARATION
+
+Before any design or build work, complete these steps in order:
+
+1. **Read `reference/template.md`** — the HTML skeleton, structural CSS, and agent-generated patterns. This is the foundation for every deck.
+2. **Gather context** — assess what exists (see Context Assessment below). Identify content, audience, tone, and any brand assets.
+3. **Read `reference/font-guide.md`** — pick the right font trio for the chosen style. Do not hardcode fonts from style files.
+4. **Read the chosen style file** from `reference/styles/` — apply its Color Palette, Typography, Design Principles, and Slide Application Notes.
+5. **Assess what references the deck needs** — does the content include data (→ `reference/data-viz.md`), images (→ `reference/media.md`), code (→ `reference/elements.md`), effects (→ `reference/effects.md`)? Load relevant references before building, not after.
+
+If context is unclear after step 2, STOP and use `AskUserQuestion` to clarify before proceeding.
+
 ## Architecture
 
-Zero dependencies. Each presentation is a single self-contained `.html` file using CSS scroll-snap — no framework, no Reveal.js.
+Zero dependencies. Each presentation is a single self-contained `.html` file using CSS scroll-snap — no framework.
 
 - Slides are `100dvh` sections with `scroll-snap-type: y mandatory`
 - Typography scales via `clamp()`, layouts are natively responsive
 - Navigation, animations, fragments — agent-generated per deck, not a fixed engine
 - Libraries (Chart.js, GSAP, D3, etc.) added via CDN only when the content needs them
 
-Read `references/template.md` before building your first deck in a session. It has the HTML skeleton, structural CSS, and agent-generated patterns.
-
 ## Context Assessment
 
-Before doing anything, assess what context already exists. Do NOT follow a rigid step-by-step wizard. Figure out what you have, what you need, and fill the gaps.
+Assess what context already exists. Do NOT follow a rigid step-by-step wizard. Figure out what you have, what you need, and fill the gaps.
 
 ### Check for existing context
 
@@ -54,7 +66,7 @@ Be an opinionated collaborator with taste, not a menu system. Make the best choi
 - **Animation level** — pick what fits the style and content. Mention it in the summary ("I used subtle fade-in animations to match the editorial feel").
 - **GSAP vs CSS animations** — use whichever produces the best result. The user doesn't need to know the implementation.
 - **Background effects** — add particle fields, shaders, or gradients when the style calls for it. Skip for restrained styles. Don't ask permission.
-- **Font trio** — read `references/font-guide.md`, pick the best match for the style, load via Google Fonts. Mention the fonts in the summary.
+- **Font trio** — read `reference/font-guide.md`, pick the best match for the style, load via Google Fonts. Mention the fonts in the summary.
 - **Charts, tables, data viz** — when content includes data, metrics, or comparisons, add appropriate visualizations. Don't ask "should I add a chart?" — just do it if the data warrants it.
 - **Icons, diagrams, code blocks** — include when content benefits. Don't ask.
 - **Fragment reveals** — add click-to-reveal for lecture/talk content where sequential builds help. Don't add for pitch decks or simple presentations.
@@ -91,7 +103,7 @@ One idea per slide. Dense slides lose audiences.
 
 ## Style Selection
 
-37 curated design styles live in `references/styles/`. Read the chosen style file for its Color Palette, Typography, Design Principles, and Slide Application Notes. Apply with taste — they're guides, not rigid templates.
+37 curated design styles live in `reference/styles/`. Read the chosen style file for its Color Palette, Typography, Design Principles, and Slide Application Notes. Apply with taste — they're guides, not rigid templates.
 
 ### Interpreting style files — terminology glossary
 
@@ -140,7 +152,7 @@ Strong single match → just use it. Multiple equally good → `AskUserQuestion`
 
 ## Font Selection
 
-49 curated font trios (heading + body + mono) in `references/font-guide.md`. **Always read the font guide** and cross-reference with the style — do not blindly hardcode fonts from the style file. Pick the trio that best fits the style's mood.
+49 curated font trios (heading + body + mono) in `reference/font-guide.md`. **Always read the font guide** and cross-reference with the style — do not blindly hardcode fonts from the style file. Pick the trio that best fits the style's mood.
 
 Load fonts via Google Fonts `<link>` tags. To convert a trio name to a Google Fonts URL, take the font family names and build: `https://fonts.googleapis.com/css2?family=Font+Name:wght@400;500;600;700&display=swap`
 
@@ -156,22 +168,20 @@ Load fonts via Google Fonts `<link>` tags. To convert a trio name to a Google Fo
 | Bold / condensed impact | headline, impact, poster, brutalist |
 | Retro / expressive | poster, headline, brutalist, creative |
 
-## References — Proactive Awareness
+## Reference Quick Lookup
 
-Do NOT read all references upfront. But **actively consider** which ones the deck needs as you plan the outline. Load each when relevant:
+All references live in `reference/`. Template and font guide are loaded in MANDATORY PREPARATION. Load the rest based on content needs:
 
-| Reference | Load when... |
+| Reference | When to load |
 |---|---|
-| `references/template.md` | **First, always** — HTML skeleton, structural CSS, agent-generated patterns |
-| `references/font-guide.md` | **Always** — pick the right font trio for the style |
-| `references/animations.md` | Choosing entrance animations and transitions for the style |
-| `references/effects.md` | Style calls for background effects (Neo-Futurism, Dark Classy, Color Field, Synthwave, Glitch Art) or user requests immersive visuals |
-| `references/data-viz.md` | Content includes data, metrics, charts, comparisons, or tables — **proactively check**: does any slide benefit from a chart or styled table? |
-| `references/media.md` | User provides images, video, logos, screenshots, or outline includes visual slides |
-| `references/elements.md` | Icons, code blocks, diagrams (Mermaid), decorative SVGs, styled lists, timelines |
-| `references/css-techniques.md` | Elevating visual quality — frosted glass, text blending, outlined type, animated gradients, clip-path reveals |
+| `reference/animations.md` | Entrance animations and transitions for the style |
+| `reference/effects.md` | Background effects — particles, shaders, scan lines, halftone, gradient mesh |
+| `reference/data-viz.md` | Data, metrics, charts, comparisons, tables |
+| `reference/media.md` | Images, video, logos, screenshots |
+| `reference/elements.md` | Icons, code blocks, diagrams, decorative SVGs, styled lists |
+| `reference/css-techniques.md` | Frosted glass, text blending, outlined type, animated gradients, clip-path reveals |
 
-**Key principle:** Don't just react to what the user explicitly asks for. Consider what would make the deck better. If the outline has data, add charts. If a quote slide would benefit from a decorative element, add one. If the style calls for entrance animations, add them. The goal is the best possible deck, not the minimum viable one.
+**Key principle:** Don't just react to what the user explicitly asks for. Consider what would make the deck better. If the outline has data, add charts. If the style calls for entrance animations, add them. The goal is the best possible deck, not the minimum viable one.
 
 ## Building the HTML
 
@@ -183,7 +193,7 @@ Single self-contained `.html` file. Styles in `<style>`, scripts in `<script>`, 
 
 ### Structure
 
-Follow the skeleton in `references/template.md`:
+Follow the skeleton in `reference/template.md`:
 
 1. **`<head>`**: Google Fonts `<link>` → optional library CSS → `<style>` with structural CSS + agent-generated styles
 2. **`<body>`**: `<div class="slide">` sections → optional progress bar / nav dots → CDN scripts → inline `<script>` with agent-generated JS
@@ -236,7 +246,7 @@ When users provide brand assets (logos, brand colors, brand fonts, style guides)
 
 1. **Brand colors override the style's accent palette.** Map the user's primary brand color to `--accent-color`. Map secondary brand colors to `--color-positive` or secondary accent roles. Keep the style's background and text colors unless the brand guide specifies otherwise.
 2. **Brand fonts override the style's typography.** If the user provides a brand font, use it for display. Fall back to the style's body font unless the brand specifies a body face too. Load brand fonts via Google Fonts if available, or ask the user for a hosted URL.
-3. **Logos** — see `references/media.md` for placement patterns. Ask the user whether the logo should appear on every slide (persistent bottom-corner) or only on title/closing slides.
+3. **Logos** — see `reference/media.md` for placement patterns. Ask the user whether the logo should appear on every slide (persistent bottom-corner) or only on title/closing slides.
 4. **Don't fight the brand.** If the user's brand is warm and rounded but they picked a brutalist style, gently suggest a better-fitting style via `AskUserQuestion` rather than forcing a mismatch.
 
 ## Design Quality & Polish
@@ -253,7 +263,7 @@ While building, ensure:
 
 The `/polish`, `/animate`, and `/delight` skills can elevate the design further — offer them to the user after the initial build.
 
-For advanced GSAP usage beyond what's in `references/animations.md`, the official GSAP skill provides deeper guidance on timelines, ScrollTrigger, and complex sequences.
+For advanced GSAP usage beyond what's in `reference/animations.md`, the official GSAP skill provides deeper guidance on timelines, ScrollTrigger, and complex sequences.
 
 ## Validation
 
