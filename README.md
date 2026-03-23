@@ -15,7 +15,7 @@ npx skills add neethanwu/visuals --skill slides
 Give it your content (or just a topic) and it builds a complete, self-contained HTML presentation. One file, opens in any browser, no build step.
 
 ```
-/slides My startup pitch for an AI-powered design tool
+/slides A talk on how we scaled our API to 10M requests per day
 ```
 
 ```
@@ -24,20 +24,7 @@ Give it your content (or just a topic) and it builds a complete, self-contained 
 
 Or just say "make slides" mid-conversation — the skill picks up context from what you've been working on.
 
-**37 design styles** — the skill matches your content to the best style automatically.
-
-| Category | Styles |
-|---|---|
-| Editorial | Editorial Financial, Editorial Data, Editorial Warm, Editorial Calm |
-| Swiss / Grid | Swiss Clean, Swiss Elegant, Swiss Clean Expressive, Bauhaus Digital |
-| Dark / Luxury | Dark Classy, Elegant Luxury, Brutalist Luxury, Bold Signal |
-| Brutalist | Neo-Brutalism, Nordic Brutalist, Industrial Humanist |
-| Art Movements | Art Deco, Bauhaus, Constructivist, Op Art, Color Field, Neo-Expressionism |
-| Retro / Nostalgia | Synthwave |
-| Digital | Apple Liquid Glass, Glitch Art, Neo-Futurism |
-| Print / Analog | Risograph, Blueprint, Contemporary Collage |
-| Bold / Graphic | Pop Art |
-| Minimal | Minimalist, Japanese Swiss Mono, Conceptual Art, Minimal Corporate |
+**37 design styles** — from Swiss typography to synthwave to glassmorphism to risograph. The skill matches your content to the best style automatically.
 
 **49 font trios** — curated heading + body + mono combinations loaded via Google Fonts. The skill cross-references fonts with styles for the best pairing.
 
@@ -51,7 +38,7 @@ Or just say "make slides" mid-conversation — the skill picks up context from w
 
 ### Coming soon
 
-- **social** — single-file HTML graphics for social platforms (1:1, 16:9, 9:16)
+- **social** — graphics for social platforms (1:1, 16:9, 9:16) with PNG export
 - **poster** — print-ready posters and flyers
 - **on-brand** — brand asset management across all skills
 
