@@ -1,6 +1,6 @@
 # Advanced CSS Techniques
 
-Pure CSS techniques to elevate slide visual quality. Zero dependencies — these work in any modern browser alongside Reveal.js.
+Pure CSS techniques to elevate slide visual quality. Zero dependencies — these work in any modern browser.
 
 ## Frosted Glass / Glassmorphism
 
@@ -248,7 +248,7 @@ Animate a number using `@property` — no JS needed.
 
 ## Scroll-Driven Reveal (Progressive Enhancement)
 
-For non-Reveal.js slides or scrollable sections within a slide:
+For scrollable sections or progressive reveal effects:
 
 ```css
 @keyframes slideUp {

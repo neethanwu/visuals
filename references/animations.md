@@ -1,78 +1,58 @@
 # Animation & Transition Reference
 
-Self-contained animation primitives for single-file HTML slides. All animations use CSS keyframes or GSAP (when included). Prefer CSS for simple animations, GSAP for sequenced/staggered reveals.
+Self-contained animation primitives for single-file HTML slides. All animations use CSS keyframes/transitions or GSAP (when included). The agent generates appropriate animations per deck based on style and content.
 
-## Slide Transitions (Reveal.js)
+## Entrance Animation Trigger
 
-Reveal.js supports these built-in transitions. Choose based on style personality.
-
-| Transition | CSS value | Best for styles |
-|---|---|---|
-| Fade | `fade` | Minimalist, Editorial Calm, Swiss Clean, Elegant Luxury |
-| Slide | `slide` | Corporate, Bauhaus Digital, Swiss Clean Expressive |
-| Convex | `convex` | Neo-Futurism, Dark Classy |
-| Concave | `concave` | Art Deco, Neo-Classicism |
-| Zoom | `zoom` | Neo-Brutalism, Nordic Brutalist, Brutalist Luxury |
-| None | `none` | Monochrome Expressive, Conceptual Art, Japanese Swiss Mono |
-
-### Reveal.js transition config
+All entrance animations use `IntersectionObserver` to detect when a slide enters the viewport. The agent generates a small JS block and the corresponding CSS:
 
 ```js
-Reveal.initialize({
-  transition: 'fade',        // default transition
-  transitionSpeed: 'default', // 'default', 'fast', 'slow'
-  backgroundTransition: 'fade',
-});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) entry.target.classList.add('visible');
+  });
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.slide').forEach(slide => observer.observe(slide));
 ```
+
+Elements with `.reveal` (or a style-specific class) start hidden and animate when their parent `.slide` gets `.visible`.
 
 ## Element Entrance Animations
 
 ### Fade Up (universal — works with any style)
 
 ```css
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(24px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fade-up {
-  animation: fadeUp 0.5s ease-out both;
-}
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+.slide.visible .reveal { opacity: 1; transform: translateY(0); }
 ```
 
 ### Fade In (minimal — for restrained styles)
 
 ```css
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.fade-in {
-  animation: fadeIn 0.4s ease-out both;
-}
+.reveal { opacity: 0; transition: opacity 0.4s ease-out; }
+.slide.visible .reveal { opacity: 1; }
 ```
 
 ### Slide In Left (editorial / constructivist styles)
 
 ```css
-@keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-40px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-.slide-in-left {
-  animation: slideInLeft 0.5s ease-out both;
-}
+.reveal { opacity: 0; transform: translateX(-40px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+.slide.visible .reveal { opacity: 1; transform: translateX(0); }
 ```
 
 ### Scale In (brutalist / bold styles)
 
 ```css
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.92); }
-  to { opacity: 1; transform: scale(1); }
-}
-.scale-in {
-  animation: scaleIn 0.4s ease-out both;
-}
+.reveal { opacity: 0; transform: scale(0.92); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+.slide.visible .reveal { opacity: 1; transform: scale(1); }
+```
+
+### Blur In (glass / luxury styles)
+
+```css
+.reveal { opacity: 0; filter: blur(10px); transition: opacity 0.6s ease-out, filter 0.6s ease-out; }
+.slide.visible .reveal { opacity: 1; filter: blur(0); }
 ```
 
 ### Type On (monospace / data styles)
@@ -96,20 +76,13 @@ Reveal.initialize({
 ### Draw Line (for decorative rules / dividers)
 
 ```css
-@keyframes drawLine {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
-}
-.draw-line {
-  transform-origin: left;
-  animation: drawLine 0.6s ease-out both;
-}
+.draw-line { transform: scaleX(0); transform-origin: left; transition: transform 0.6s ease-out; }
+.slide.visible .draw-line { transform: scaleX(1); }
 ```
 
-### Counter / Number Roll (for metrics / KPIs)
+### Counter / Number Roll (for metrics — requires GSAP)
 
 ```js
-// GSAP approach (include GSAP)
 function animateCounter(el, target) {
   gsap.to(el, {
     innerText: target,
@@ -121,28 +94,54 @@ function animateCounter(el, target) {
     }
   });
 }
+
+// Trigger on slide visibility
+const counterObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.querySelectorAll('[data-counter]').forEach(el => {
+        animateCounter(el, parseInt(el.dataset.counter));
+      });
+    }
+  });
+}, { threshold: 0.5 });
 ```
 
 ### Stagger Children (GSAP — for lists, grids, cards)
 
 ```js
-// Stagger list items on slide entry
-Reveal.on('slidechanged', event => {
-  const items = event.currentSlide.querySelectorAll('.stagger-item');
-  if (items.length) {
-    gsap.fromTo(items,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: "power2.out" }
-    );
-  }
-});
+// Stagger items when slide becomes visible
+const staggerObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const items = entry.target.querySelectorAll('.stagger-item');
+      if (items.length) {
+        gsap.fromTo(items,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.4, stagger: 0.1, ease: "power2.out" }
+        );
+      }
+    }
+  });
+}, { threshold: 0.3 });
+```
+
+## Stagger Timing (CSS — no GSAP needed)
+
+For simple stagger without GSAP, use `transition-delay` on nth-child:
+
+```css
+.reveal:nth-child(1) { transition-delay: 0s; }
+.reveal:nth-child(2) { transition-delay: 0.1s; }
+.reveal:nth-child(3) { transition-delay: 0.2s; }
+.reveal:nth-child(4) { transition-delay: 0.3s; }
+.reveal:nth-child(5) { transition-delay: 0.4s; }
 ```
 
 ## Style-to-Animation Mapping
 
 ### Restrained styles (minimal animation)
 **Styles:** Minimalist, Editorial Calm, Japanese Swiss Mono, Swiss Clean, Conceptual Art
-- Slide transition: `fade` or `none`
 - Entrance: `fade-in` only (no movement)
 - Duration: 300-400ms
 - No stagger effects
@@ -151,7 +150,6 @@ Reveal.on('slidechanged', event => {
 
 ### Editorial styles (purposeful, print-inspired)
 **Styles:** Editorial Financial, Editorial Data, Editorial Warm, Swiss Elegant, Industrial Humanist
-- Slide transition: `fade`
 - Entrance: `fade-up` for headings, `fade-in` for body
 - Duration: 400-500ms
 - Draw-line for decorative rules
@@ -159,8 +157,7 @@ Reveal.on('slidechanged', event => {
 - GSAP optional
 
 ### Bold styles (dramatic, high-energy)
-**Styles:** Neo-Brutalism, Nordic Brutalist v1/v2, Brutalist Luxury v1/v2, Bauhaus Digital
-- Slide transition: `zoom` or `slide`
+**Styles:** Neo-Brutalism, Nordic Brutalist v1/v2, Brutalist Luxury v1/v2, Bauhaus Digital, Pop Art
 - Entrance: `scale-in` for headings, `fade-up` for content
 - Duration: 300-400ms (fast and punchy)
 - Aggressive stagger (0.06s) for grids
@@ -168,31 +165,36 @@ Reveal.on('slidechanged', event => {
 - GSAP recommended
 
 ### Dark/luxury styles (smooth, cinematic)
-**Styles:** Elegant Luxury, Dark Classy, Brutalist Luxury, Minimal Corporate (dark slides)
-- Slide transition: `fade` (slow, 800ms)
-- Entrance: `fade-up` with longer duration (600ms)
+**Styles:** Elegant Luxury, Dark Classy, Brutalist Luxury, Minimal Corporate (dark slides), Apple Liquid Glass
+- Entrance: `fade-up` or `blur-in` with longer duration (600ms)
 - Easing: `cubic-bezier(0.25, 0.1, 0.25, 1)` — smooth deceleration
 - Subtle stagger (0.12s)
 - Counter animation for KPIs
 - GSAP recommended for polish
 
 ### Expressive styles (playful, unconventional)
-**Styles:** Neo-Expressionism, Contemporary Collage, Color Field, Op Art, Deconstructivist
-- Slide transition: `convex` or custom
+**Styles:** Neo-Expressionism, Contemporary Collage, Color Field, Op Art, Deconstructivist, Risograph
 - Entrance: mix of `slide-in-left`, `scale-in`, `fade-up` — variety is intentional
 - Duration: 400-600ms
 - Rotation animations for decorative elements
 - Stagger with slight randomness
 - GSAP recommended
 
-### Futuristic styles (technical, animated)
-**Styles:** Neo-Futurism, Bauhaus Digital (dark variant)
-- Slide transition: `convex` or `fade`
+### Futuristic / digital styles (technical, animated)
+**Styles:** Neo-Futurism, Bauhaus Digital (dark variant), Glitch Art, Synthwave
 - Entrance: `fade-up` + `type-on` for labels
 - Duration: 300-500ms
-- Continuous background animations (grid pulse, particle drift)
+- Continuous background animations (grid pulse, particle drift, scan lines)
 - Counter animation for data
 - GSAP + optional Three.js/shaders
+
+### Print / analog styles
+**Styles:** Risograph, Blueprint
+- Entrance: `fade-in` or `slide-in-left`
+- Duration: 400-500ms
+- Draw-line for dimension lines (Blueprint)
+- Minimal animation — let the visual texture carry the style
+- No GSAP needed
 
 ## Timing Reference
 
@@ -207,27 +209,13 @@ Reveal.on('slidechanged', event => {
 | `--ease-bounce` | `cubic-bezier(0.34, 1.56, 0.64, 1)` | Playful/bold styles |
 | `--ease-sharp` | `cubic-bezier(0.4, 0.0, 0.6, 1)` | Brutalist/punchy |
 
-## Reveal.js Fragment Animations
+## Fragment Animations
 
-Use Reveal.js fragments for within-slide reveals:
-
-```html
-<p class="fragment fade-up">Appears on next click</p>
-<p class="fragment fade-up" data-fragment-index="1">Numbered order</p>
-```
-
-Built-in fragment styles: `fade-up`, `fade-down`, `fade-left`, `fade-right`, `fade-in`, `fade-out`, `grow`, `shrink`, `strike`, `highlight-red`, `highlight-blue`, `highlight-green`.
-
-Custom fragment animations:
+Fragments (within-slide reveals) use the same CSS patterns as entrance animations but are triggered by user interaction (click/keypress) instead of IntersectionObserver:
 
 ```css
-.fragment.custom-fade-up {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.4s ease-out;
-}
-.fragment.custom-fade-up.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
+.fragment { opacity: 0; transform: translateY(12px); transition: opacity 0.4s ease-out, transform 0.4s ease-out; }
+.fragment.visible { opacity: 1; transform: translateY(0); }
 ```
+
+The agent generates the fragment handler JS inline — see `template.md` for the pattern.

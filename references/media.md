@@ -15,11 +15,11 @@ When users provide images, they may give:
 
 **Full-bleed background image:**
 ```html
-<section data-background-image="path/to/image.jpg" data-background-size="cover" data-background-position="center">
-  <div class="image-overlay">
+<div class="slide slide-bg-image" style="background-image: url('path/to/image.jpg'); background-size: cover; background-position: center;">
+  <div class="slide-content image-overlay">
     <h2>Headline Over Image</h2>
   </div>
-</section>
+</div>
 ```
 
 ```css
@@ -39,8 +39,8 @@ When users provide images, they may give:
 
 **Image + text side-by-side:**
 ```html
-<section>
-  <div class="split-layout">
+<div class="slide">
+  <div class="slide-content split-layout">
     <div class="split-image">
       <img src="path/to/image.jpg" alt="Description">
     </div>
@@ -49,7 +49,7 @@ When users provide images, they may give:
       <p>Body text alongside the image.</p>
     </div>
   </div>
-</section>
+</div>
 ```
 
 ```css
@@ -69,12 +69,12 @@ When users provide images, they may give:
 
 **Framed image with caption (editorial styles):**
 ```html
-<section>
+<div class="slide"><div class="slide-content">
   <figure class="framed-image">
     <img src="path/to/image.jpg" alt="Description">
     <figcaption>Caption text — Source attribution</figcaption>
   </figure>
-</section>
+</div></div>
 ```
 
 ```css
@@ -138,13 +138,13 @@ When users provide images, they may give:
 
 ```css
 /* Always constrain images within slides */
-.reveal img {
+.slide img {
   max-width: 100%;
   height: auto;
 }
 
 /* Prevent images from overflowing slide bounds */
-.reveal section img {
+.slide img {
   max-height: 70vh;
   object-fit: contain;
 }
@@ -165,24 +165,26 @@ When users provide images, they may give:
 
 **Video as slide background:**
 ```html
-<section data-background-video="video.mp4"
-         data-background-video-loop
-         data-background-video-muted
-         data-background-size="cover">
-  <h2>Content over video</h2>
-</section>
+<div class="slide" style="position:relative;">
+  <video autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;">
+    <source src="video.mp4" type="video/mp4">
+  </video>
+  <div class="slide-content" style="position:relative;z-index:1;">
+    <h2>Content over video</h2>
+  </div>
+</div>
 ```
 
 **YouTube/Vimeo embed:**
 ```html
-<section>
+<div class="slide"><div class="slide-content">
   <div class="video-embed">
     <iframe src="https://www.youtube.com/embed/VIDEO_ID"
             frameborder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope"
             allowfullscreen></iframe>
   </div>
-</section>
+</div></div>
 ```
 
 ```css
@@ -200,18 +202,21 @@ When users provide images, they may give:
 }
 ```
 
-### Video controls with Reveal.js
+### Video controls with IntersectionObserver
 
 ```js
-// Auto-play video when slide is shown, pause when navigated away
-Reveal.on('slidechanged', event => {
-  // Pause all videos on previous slide
-  if (event.previousSlide) {
-    event.previousSlide.querySelectorAll('video').forEach(v => v.pause());
-  }
-  // Play videos on current slide
-  event.currentSlide.querySelectorAll('video[autoplay]').forEach(v => v.play());
-});
+// Auto-play video when slide is visible, pause when not
+const videoObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    const videos = entry.target.querySelectorAll('video');
+    videos.forEach(v => {
+      if (entry.isIntersecting) { v.play(); }
+      else { v.pause(); }
+    });
+  });
+}, { threshold: 0.5 });
+
+document.querySelectorAll('.slide').forEach(s => videoObserver.observe(s));
 ```
 
 ## Logos & Brand Assets

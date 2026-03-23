@@ -1,12 +1,23 @@
 ---
 name: slides
-description: Build beautiful single-file HTML presentations with professional design, animations, and interactive effects. Use when the user wants to create slides, a presentation, a deck, a pitch deck, a talk, a keynote, or a lecture. Triggers on "make slides", "build a presentation", "slide deck", "create a deck", "presentation about", "slides for my talk", "pitch deck for", "turn this into slides", "present this", "/slides". Also triggers when user has accumulated content (notes, outlines, research) and wants it turned into a visual presentation.
+description: Builds beautiful single-file HTML presentations with professional design, animations, and interactive effects. Triggers when the user wants to create slides, a presentation, a deck, a pitch deck, a talk, a keynote, or a lecture. Activates on "make slides", "build a presentation", "slide deck", "create a deck", "presentation about", "slides for my talk", "pitch deck for", "turn this into slides", "present this", "/slides". Also triggers when user has accumulated content (notes, outlines, research) and wants it turned into a visual presentation.
 argument-hint: [topic or content]
 effort: high
 allowed-tools: Read, Write, Bash, Glob, Grep, Agent, AskUserQuestion
 ---
 
 # Slides — Single-File HTML Presentation Builder
+
+## Architecture
+
+Zero dependencies. Each presentation is a single self-contained `.html` file using CSS scroll-snap — no framework, no Reveal.js.
+
+- Slides are `100dvh` sections with `scroll-snap-type: y mandatory`
+- Typography scales via `clamp()`, layouts are natively responsive
+- Navigation, animations, fragments — agent-generated per deck, not a fixed engine
+- Libraries (Chart.js, GSAP, D3, etc.) added via CDN only when the content needs them
+
+Read `references/template.md` before building your first deck in a session. It has the HTML skeleton, structural CSS, and agent-generated patterns.
 
 ## Context Assessment
 
@@ -28,25 +39,32 @@ Before doing anything, assess what context already exists. Do NOT follow a rigid
 | Existing HTML slides to improve | Read them, identify gaps, enhance |
 | Nothing (bare `/slides` invocation) | Ask what the presentation is about |
 
-## When to Ask vs When to Infer
+## Communication Philosophy
 
-**Only ask for what you genuinely cannot infer.** Most users don't know design terminology.
+Be an opinionated collaborator with taste, not a menu system. Make the best choices you can, and communicate with the user in plain language when there's a meaningful fork in the road.
 
-### Use `AskUserQuestion` when:
+### Always ask when needed:
+- **Content gaps** — you need the user's actual content, topic, or key points. Don't fabricate.
+- **Brand context** — if the presentation is for a company or product, ask whether they have brand colors, fonts, or a logo to incorporate. Don't ask for a personal/casual deck.
+- **Speaker notes** — for talk-style decks, ask if they want speaker notes embedded.
+- **Meaningful style forks** — when 2-3 styles would work equally well, present them in plain language the user can evaluate:
+  > "I see two directions for this:\n\n1. **Warm editorial** — cream tones, serif headlines, magazine feel\n2. **Dark and bold** — black background, neon accent, high-impact\n\nWhich feels right, or should I pick?"
 
-- **Content is missing or ambiguous** — you need the user's actual content, topic, or key points. Don't fabricate content.
-- **Multiple strong style options exist** — present 2-3 choices with plain-language descriptions:
-  > "Your content has a data-journalism feel. I see two directions:\n\n1. **Editorial Financial** — warm parchment tones, newspaper-grid layout, authoritative serif headlines\n2. **Editorial Data** — magazine-quality, italic headlines, monochromatic and restrained\n\nWhich feels right, or should I pick?"
-- **User-provided assets** — ask if they have images, logos, data, or brand colors to incorporate.
-- **Ambiguous audience/tone** — if content could go formal or casual and it affects style choice.
-- **Refinement after first build** — ask what to adjust rather than guessing.
+### Agent decides, then communicates what it chose:
+- **Animation level** — pick what fits the style and content. Mention it in the summary ("I used subtle fade-in animations to match the editorial feel").
+- **GSAP vs CSS animations** — use whichever produces the best result. The user doesn't need to know the implementation.
+- **Background effects** — add particle fields, shaders, or gradients when the style calls for it. Skip for restrained styles. Don't ask permission.
+- **Font trio** — read `references/font-guide.md`, pick the best match for the style, load via Google Fonts. Mention the fonts in the summary.
+- **Charts, tables, data viz** — when content includes data, metrics, or comparisons, add appropriate visualizations. Don't ask "should I add a chart?" — just do it if the data warrants it.
+- **Icons, diagrams, code blocks** — include when content benefits. Don't ask.
+- **Fragment reveals** — add click-to-reveal for lecture/talk content where sequential builds help. Don't add for pitch decks or simple presentations.
 
-### Do NOT ask about:
-
-- Hex colors, font names, animation easing, CSS values, or technical implementation details
-- Which of 31 styles to use — curate for them
+### Never ask about:
+- Hex colors, font names, animation easing, CSS values, or technical implementation
+- Which of the 37 styles to use — curate for them
 - Things you can infer from content (data-heavy → data-appropriate style)
 - Things with a clear single best answer
+- "Should I add GSAP?" "Should I include a progress bar?" — make the call
 
 When using `AskUserQuestion`, keep options to **2-3 max**. Describe in terms users care about (mood, feel, impression), not specs. Always include: "or should I just pick?"
 
@@ -73,11 +91,11 @@ One idea per slide. Dense slides lose audiences.
 
 ## Style Selection
 
-31 curated design styles live in `references/styles/`. Read the chosen style file for its Color Palette, Typography, Design Principles, and Slide Application Notes. Apply with taste — they're guides, not rigid templates.
+37 curated design styles live in `references/styles/`. Read the chosen style file for its Color Palette, Typography, Design Principles, and Slide Application Notes. Apply with taste — they're guides, not rigid templates.
 
 ### Interpreting style files — terminology glossary
 
-Style files use inconsistent terminology across the 31 files. Normalize when reading:
+Style files use inconsistent terminology. Normalize when reading:
 
 | You may see in a style file | Treat as | CSS custom property |
 |---|---|---|
@@ -93,34 +111,38 @@ Style files use inconsistent terminology across the 31 files. Normalize when rea
 | Body Font, Text Font, UI Font | Body typeface | `--body-font` |
 | Data Font, Mono Font, Code Font | Monospace typeface | `--mono-font` |
 
-Always map style file tokens to these CSS custom properties in your output. This keeps the HTML consistent regardless of which style file was used.
+Always map style file tokens to these CSS custom properties in your output.
 
 ### How to choose
 
-Infer from content. Do NOT present all 31 as a menu.
+Infer from content. Do NOT present all 37 as a menu.
 
 | Content type | Recommended styles |
 |---|---|
 | Startup pitch / product launch | p-bold-signal, p-minimal-corporate, p-dark-classy, p-swiss-clean |
 | Financial / data-heavy | p-editorial-financial, p-editorial-data, p-swiss-elegant |
-| Technical / engineering | p-bauhaus-digital, p-swiss-clean-expressive, 08-neo-brutalism |
-| Creative / portfolio | 05-neo-expressionism, 16-contemporary-collage, p-monochrome-expressive |
+| Technical / engineering | p-bauhaus-digital, p-swiss-clean-expressive, 08-neo-brutalism, blueprint |
+| Creative / portfolio | 05-neo-expressionism, 16-contemporary-collage, p-monochrome-expressive, pop-art |
 | Corporate / formal | p-minimal-corporate, p-swiss-clean, p-editorial-calm |
 | Academic / research | p-editorial-calm, p-swiss-elegant, 01-minimalist |
-| Luxury / premium brand | p-elegant-luxury, p-brutalist-luxury, p-dark-classy |
-| Futuristic / tech-forward | 07-neo-futurism, p-bold-signal, p-bauhaus-digital, p-dark-classy |
+| Luxury / premium brand | p-elegant-luxury, p-brutalist-luxury, p-dark-classy, apple-liquid-glass |
+| Futuristic / tech-forward | 07-neo-futurism, p-bold-signal, p-bauhaus-digital, glitch-art |
 | Editorial / storytelling | p-editorial-warm, p-editorial-calm, p-industrial-humanist |
 | Bold / high-impact | p-bold-signal, p-nordic-brutalist-v2, p-brutalist-luxury-v2, 08-neo-brutalism |
 | Warm / approachable | p-editorial-warm, p-industrial-humanist, 01-minimalist |
 | Elegant / refined | p-swiss-elegant, 12-art-deco, 06-neo-classicism |
+| Retro / nostalgic / fun | synthwave, pop-art, risograph |
+| Print / analog aesthetic | risograph, 16-contemporary-collage, blueprint |
+| Disruptive / edgy | glitch-art, 04-deconstructivist, 08-neo-brutalism |
+| Modern / glass / premium tech | apple-liquid-glass, p-dark-classy, 07-neo-futurism |
 
 Strong single match → just use it. Multiple equally good → `AskUserQuestion` with 2-3 visual descriptions.
 
 ## Font Selection
 
-49 curated font trios (heading + body + mono) in `references/font-guide.md`. Cross-reference with the style rather than blindly using fonts hardcoded in style files.
+49 curated font trios (heading + body + mono) in `references/font-guide.md`. **Always read the font guide** and cross-reference with the style — do not blindly hardcode fonts from the style file. Pick the trio that best fits the style's mood.
 
-**Important:** The font guide lists `npx shadcn` install commands — ignore those. For slides, load fonts via Google Fonts `<link>` tags. To convert a trio name to a Google Fonts URL, take the font family names from the trio and build: `https://fonts.googleapis.com/css2?family=Font+Name:wght@400;500;600;700&display=swap`
+Load fonts via Google Fonts `<link>` tags. To convert a trio name to a Google Fonts URL, take the font family names and build: `https://fonts.googleapis.com/css2?family=Font+Name:wght@400;500;600;700&display=swap`
 
 | Style mood | Strong trio matches |
 |---|---|
@@ -132,171 +154,81 @@ Strong single match → just use it. Multiple equally good → `AskUserQuestion`
 | Warm / humanist | storyteller, journal, commons, health |
 | Data / dashboard | dashboard, fintech, devtool, technical |
 | Bold / condensed impact | headline, impact, poster, brutalist |
+| Retro / expressive | poster, headline, brutalist, creative |
 
-## References — Load on Demand
+## References — Proactive Awareness
 
-Do NOT read all references upfront. Load each **only when you need it**:
+Do NOT read all references upfront. But **actively consider** which ones the deck needs as you plan the outline. Load each when relevant:
 
-- Read `references/libraries.md` **first, always** — it has the CDN links and Reveal.js config you need to scaffold the HTML.
-- Read `references/animations.md` **when choosing transitions and entrance animations** for the selected style.
-- Read `references/effects.md` **when the style calls for background effects** (Neo-Futurism, Dark Classy, Color Field) or the user requests immersive/interactive visuals. Skip for restrained styles.
-- Read `references/data-viz.md` **when the slide outline includes data, metrics, charts, comparisons, or tables**.
-- Read `references/media.md` **when the user provides images, video, logos, or screenshots**, or the outline includes image/video slides.
-- Read `references/elements.md` **when you need icons, code blocks, diagrams (Mermaid), decorative SVGs, or styled lists**.
+| Reference | Load when... |
+|---|---|
+| `references/template.md` | **First, always** — HTML skeleton, structural CSS, agent-generated patterns |
+| `references/font-guide.md` | **Always** — pick the right font trio for the style |
+| `references/animations.md` | Choosing entrance animations and transitions for the style |
+| `references/effects.md` | Style calls for background effects (Neo-Futurism, Dark Classy, Color Field, Synthwave, Glitch Art) or user requests immersive visuals |
+| `references/data-viz.md` | Content includes data, metrics, charts, comparisons, or tables — **proactively check**: does any slide benefit from a chart or styled table? |
+| `references/media.md` | User provides images, video, logos, screenshots, or outline includes visual slides |
+| `references/elements.md` | Icons, code blocks, diagrams (Mermaid), decorative SVGs, styled lists, timelines |
+| `references/css-techniques.md` | Elevating visual quality — frosted glass, text blending, outlined type, animated gradients, clip-path reveals |
+
+**Key principle:** Don't just react to what the user explicitly asks for. Consider what would make the deck better. If the outline has data, add charts. If a quote slide would benefit from a decorative element, add one. If the style calls for entrance animations, add them. The goal is the best possible deck, not the minimum viable one.
 
 ## Building the HTML
 
-Read `references/example-output.md` **before building your first deck in a session** — it's a complete working 5-slide example showing correct structure, load order, theming, chart rendering, and animations. Pattern-match against it, don't copy it verbatim.
-
 ### Output
 
-Single self-contained `.html` file. Styles in `<style>`, scripts in `<script>`, libraries via CDN.
+Single self-contained `.html` file. Styles in `<style>`, scripts in `<script>`, libraries via CDN only when needed.
 
 **Content sanitization:** When interpolating user-provided text into slides, escape `<script>`, `</style>`, and raw HTML tags in body content to prevent accidental breakage of the document structure.
 
-### Structure (follow this exactly)
+### Structure
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Presentation Title</title>
+Follow the skeleton in `references/template.md`:
 
-  <!-- 1. Google Fonts (MUST be first, before any CSS that references them) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=...&display=swap" rel="stylesheet">
+1. **`<head>`**: Google Fonts `<link>` → optional library CSS → `<style>` with structural CSS + agent-generated styles
+2. **`<body>`**: `<div class="slide">` sections → optional progress bar / nav dots → CDN scripts → inline `<script>` with agent-generated JS
 
-  <!-- 2. Reveal.js CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/white.css">
+The structural CSS (~10 lines) is always present. Everything else — typography, layouts, colors, animations, navigation JS, fragment handling — is generated fresh for each deck based on style + content.
 
-  <!-- 3. Optional: Highlight.js theme CSS -->
+### What to generate per deck
 
-  <!-- 4. Custom styles (MUST come after Reveal.js CSS to override it) -->
-  <style>
-    /* CSS custom properties from chosen style */
-    :root {
-      --display-font: 'Font Name', sans-serif;
-      --body-font: 'Font Name', sans-serif;
-      --mono-font: 'Font Name', monospace;
-      --text-primary: #1A1A1A;
-      --text-secondary: #777;
-      --bg-color: #FAFAF7;
-      --accent-color: #C41E3A;
-      --border-color: #E0E0E0;
-    }
-    /* Override Reveal.js defaults — see Gotchas */
-    .reveal { font-family: var(--body-font); color: var(--text-primary); }
-    .reveal h1, .reveal h2, .reveal h3 { font-family: var(--display-font); }
-    /* Animation keyframes */
-    /* Slide-specific layouts */
-  </style>
-</head>
-<body>
-  <!-- Optional: background canvas for effects (z-index: 0) -->
-
-  <div class="reveal">
-    <div class="slides">
-      <section><!-- slide --></section>
-    </div>
-  </div>
-
-  <!-- 5. Reveal.js JS -->
-  <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
-
-  <!-- 6. Optional libs: GSAP, Chart.js, D3, Lucide, Mermaid, Highlight.js plugin -->
-
-  <!-- 7. Optional: Three.js (importmap + module script, must be last) -->
-
-  <script>
-    // Reveal.js init
-    Reveal.initialize({
-      hash: true,
-      transition: 'fade',
-      transitionSpeed: 'default',
-      backgroundTransition: 'fade',
-      center: true,
-      width: 1920,
-      height: 1080,
-      margin: 0.04,
-      controls: true,
-      progress: true,
-      slideNumber: 'c/t',
-    });
-
-    // GSAP slide-change hook (if GSAP included)
-    // Chart rendering on slide entry (if Chart.js included)
-    // Lucide init (if Lucide included)
-    // Mermaid init (if Mermaid included)
-  </script>
-</body>
-</html>
-```
-
-**This load order is mandatory.** See Gotchas for why.
+| Feature | When to include | How |
+|---|---|---|
+| Keyboard navigation | Always | Agent generates JS for arrow keys, space bar |
+| Touch/swipe support | Mobile-friendly decks | Agent adds touch event handlers |
+| Entrance animations | Most decks (skip for ultra-minimal) | IntersectionObserver + CSS transitions. See `animations.md` for style-specific patterns |
+| Fragment reveals | Talks/lectures with sequential builds | `.fragment` + `.visible` class pattern. See `template.md` |
+| Progress bar | Longer decks (10+ slides) | Fixed bar at top, updates on scroll |
+| Navigation dots | When style suits visible nav | Positioned buttons, highlight active |
+| Background effects | When style calls for it | Canvas/WebGL behind slides. See `effects.md` |
+| GSAP animations | Staggered reveals, counters, complex sequences | Load GSAP CDN, use with IntersectionObserver |
+| Charts | Data slides | Chart.js or D3, render on slide visibility via IntersectionObserver |
+| Code highlighting | Code slides | Highlight.js CDN, call `hljs.highlightAll()` after DOM ready |
+| Diagrams | Process/flow slides | Mermaid CDN, init with `startOnLoad: false`, call `mermaid.run()` after DOM ready |
+| Icons | When content benefits | Lucide CDN, call `lucide.createIcons()` after DOM ready |
+| Speaker notes | When user requests | HTML comments inside `.slide` divs |
 
 ## Gotchas
 
-These are real issues the agent will hit. Read before building.
+These are real issues to watch for:
 
-- **Reveal.js overrides your font-size.** It sets `font-size` on `.reveal` and scales content to fit `width`/`height`. Your custom font sizes only work if you target `.reveal h1`, `.reveal p`, etc. — not bare `h1`, `p`. Always scope selectors under `.reveal`.
+- **Chart.js canvases need explicit dimensions.** A `<canvas>` inside a slide collapses to 0x0 unless wrapped in a container with explicit dimensions or given `width`/`height` attributes.
 
-- **CDN load order matters.** Google Fonts `<link>` → Reveal.js CSS → your `<style>`. If your custom styles load before Reveal.js CSS, Reveal overrides them. If fonts load after your CSS, the first paint flashes unstyled text.
+- **Charts should render on visibility, not page load.** Use IntersectionObserver to detect when a chart's slide enters the viewport, then create the chart. Otherwise charts render at 0x0 inside off-screen slides.
 
-- **Reveal.js viewport scaling.** Reveal scales the entire `.slides` container to fit the window based on `width`/`height` config. `clamp()` and viewport units (`vw`, `vh`) behave relative to Reveal's virtual viewport (1920x1080), not the browser window. Use `px` or `em` for reliable sizing inside slides.
+- **Three.js `importmap` must precede module scripts.** Place `<script type="importmap">` before any `<script type="module">`.
 
-- **Chart.js canvases need explicit dimensions.** A `<canvas>` inside a Reveal slide collapses to 0x0 unless you set `width`/`height` attributes or wrap it in a container with explicit dimensions. Always set: `<canvas width="700" height="400">`.
+- **Background canvas z-index.** Canvas for effects: `position: fixed; z-index: 0`. Slides need `position: relative; z-index: 1`.
 
-- **Chart.js renders once, not per slide.** Charts should be created on `slidechanged` event, not on page load — otherwise they render invisible inside off-screen slides and miscalculate their size. Track rendered state with a `data-rendered` attribute.
+- **Mermaid timing.** Initialize with `startOnLoad: false`, call `mermaid.run()` after DOM is ready. Otherwise diagrams on non-first slides never render.
 
-- **Three.js `importmap` must precede module scripts.** The `<script type="importmap">` tag must appear before any `<script type="module">` that uses the imports. Place it right before the module script at the bottom.
+- **Lucide icons need explicit init.** Call `lucide.createIcons()` after DOM is ready.
 
-- **Background canvas z-index.** If using a `<canvas>` for background effects, it must be `position: fixed; z-index: 0` and the `.reveal` div must be `position: relative; z-index: 1`. Without this, slides render behind the canvas.
+- **Fragment + navigation interaction.** When fragments exist on a slide, keyboard navigation should reveal fragments first, then advance to the next slide when all fragments are visible. The agent must wire these together.
 
-- **Mermaid + Reveal.js timing.** Mermaid must initialize with `startOnLoad: false` and explicitly call `mermaid.run()` on `Reveal.on('ready')` and `Reveal.on('slidechanged')`. Otherwise diagrams on non-first slides never render.
+- **Google Fonts load order.** Font `<link>` tags must appear before any `<style>` that references them to avoid flash of unstyled text.
 
-- **Lucide icon re-init.** Call `lucide.createIcons()` on every `slidechanged` event — icons on slides that haven't been shown yet won't have been created.
-
-- **Speaker notes need Reveal.js Notes plugin.** Import separately: `https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.esm.js` and add to `plugins: []` array.
-
-## Validation
-
-After writing the HTML file, verify before telling the user it's done:
-
-1. **Read the file back** — scan for:
-   - CDN load order matches the mandatory structure above
-   - All `<section>` tags are properly closed
-   - CSS custom properties are defined in `:root` and used consistently
-   - No unstyled elements (bare `<table>`, `<ul>`, `<canvas>` without dimensions)
-   - Font families in CSS match what's loaded in Google Fonts `<link>`
-
-2. **Check for common breaks:**
-   - Chart canvases have explicit width/height
-   - Mermaid uses `startOnLoad: false`
-   - GSAP `slidechanged` hook exists if GSAP is included
-   - Three.js importmap appears before module script
-   - All selectors scoped under `.reveal`
-
-3. **If issues found** — fix them and re-read. Do not proceed until validation passes.
-
-4. **Design polish pass** (optional — ask the user):
-   - Offer: "Want me to run a polish pass to refine the design?"
-   - If yes, invoke `/polish` on the generated HTML file — fixes alignment, spacing, consistency
-   - Then `/animate` — reviews and enhances animations with purposeful motion
-   - Then `/delight` — adds moments of personality and unexpected touches
-   - If the user declines or wants the file as-is, skip this step.
-
-5. **Tell the user:**
-   - The file path
-   - How to open it (`open filename.html` or browser)
-   - Offer refinements: "Want me to adjust colors, swap the style, add speaker notes, or rework any specific slide?"
-
-## Advanced CSS Techniques
-
-Read `references/css-techniques.md` **when you want to elevate the visual quality** beyond basic layouts — frosted glass cards, text blending effects, outlined display type, animated gradients, or clip-path reveals. These are pure CSS, zero dependencies, and can dramatically improve the deck without adding libraries.
+- **Content overflow.** Each slide has `overflow: hidden`. If content is too dense, it clips. Respect the "one idea per slide" rule. Use responsive `clamp()` sizing so content scales down on smaller screens.
 
 ## On-Brand Customization
 
@@ -319,14 +251,47 @@ While building, ensure:
 
 ### Polish pass
 
-The `/polish`, `/animate`, and `/delight` skills in validation (step 4) can elevate the design further — offer them to the user after the initial build.
+The `/polish`, `/animate`, and `/delight` skills can elevate the design further — offer them to the user after the initial build.
 
 For advanced GSAP usage beyond what's in `references/animations.md`, the official GSAP skill provides deeper guidance on timelines, ScrollTrigger, and complex sequences.
+
+## Validation
+
+After writing the HTML file, verify before telling the user it's done:
+
+1. **Read the file back** — scan for:
+   - Structural CSS present (scroll-snap, 100dvh, overflow hidden, reduced-motion)
+   - All `<div class="slide">` tags properly closed
+   - CSS custom properties defined in `:root` and used consistently
+   - No unstyled elements (bare `<table>`, `<ul>`, `<canvas>` without dimensions)
+   - Font families in CSS match what's loaded in Google Fonts `<link>`
+   - Navigation JS present (keyboard at minimum)
+   - IntersectionObserver wired up if entrance animations exist
+
+2. **Check for common breaks:**
+   - Chart canvases have explicit width/height or a sized container
+   - Mermaid uses `startOnLoad: false`
+   - Three.js importmap appears before module script
+   - Fragment handler integrates with navigation (reveals before advancing)
+   - Lucide `createIcons()` called after DOM ready
+
+3. **If issues found** — fix them and re-read. Do not proceed until validation passes.
+
+4. **Design polish pass** (optional — offer to the user):
+   - "Want me to run a polish pass to refine the design?"
+   - If yes, invoke `/polish`, `/animate`, `/delight` in sequence
+   - If the user declines, skip.
+
+5. **Tell the user:**
+   - The file path
+   - How to open it (`open filename.html` or browser)
+   - What style, fonts, and key design choices you made
+   - Offer refinements: "Want me to adjust colors, swap the style, add speaker notes, or rework any specific slide?"
 
 ## What NOT to do
 
 - Don't ask users to pick hex colors, font names, or animation curves
-- Don't present all 32 styles as a menu
+- Don't present all 37 styles as a menu
 - Don't add Three.js or shaders to a simple corporate deck
 - Don't ignore the style's do/don't rules
 - Don't generate placeholder content — if content is missing, ask for it
@@ -335,3 +300,6 @@ For advanced GSAP usage beyond what's in `references/animations.md`, the officia
 - Don't embed large images as base64 — use URLs or file paths
 - Don't tell the user the file is ready before running validation
 - Don't override brand colors with the style's default accent — brand takes priority
+- Don't hardcode fonts from style files without checking the font guide
+- Don't skip data visualization when the content has data — charts and styled tables make decks better
+- Don't ask the user technical implementation questions they can't answer

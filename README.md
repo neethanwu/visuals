@@ -1,10 +1,10 @@
 # Slides
 
-Agent Skill to build stunning presentations in single-page HTML, with 32 curated design styles, interactive effects, and smart style inference.
+Agent Skill to build stunning presentations in single-page HTML, with 37 curated design styles, interactive effects, and smart style inference.
 
 ## What it does
 
-Give it your content (or just a topic) and it builds a complete, self-contained HTML presentation. One file, opens in any browser, no build step.
+Give it your content (or just a topic) and it builds a complete, self-contained HTML presentation. One file, opens in any browser, no build step, zero dependencies.
 
 The skill picks the right design style, fonts, colors, animations, and effects based on your content — so you don't need to know anything about design. It handles everything from a quick 5-slide pitch to a 40-slide keynote.
 
@@ -34,21 +34,25 @@ The skill picks up context from your conversation. If you've been working on con
 
 ## What's inside
 
-### 32 Design Styles
+### 37 Design Styles
 
-From minimal Swiss typography to bold neon-on-dark to warm editorial — each style defines colors, fonts, spacing, layout rules, and do/don't guidelines.
+From minimal Swiss typography to bold neon-on-dark to warm editorial to retro synthwave — each style defines colors, fonts, spacing, layout rules, and do/don't guidelines.
 
 A few examples:
 
 - **Editorial Financial** — warm parchment, newspaper grid, authoritative serifs
 - **Dark Classy** — premium dark mode, warm orange accent, editorial serif titles
 - **Bold Signal** — neon lime on black, condensed type at extreme scale, high energy
-- **Swiss Clean** — Zurich-school precision, vivid red accent, geometric rigor
-- **Nordic Brutalist** — warm cream + charcoal, terracotta accent, heavy borders
+- **Synthwave** — 80s retro-futurism, pink-purple-cyan, perspective grids
+- **Apple Liquid Glass** — translucent glass panels, animated gradient mesh
+- **Risograph** — bold spot colors, halftone dots, print-inspired texture
+- **Blueprint** — white technical linework on engineering blue, mono type
+- **Pop Art** — saturated primaries, black outlines, comic-book energy
+- **Glitch Art** — RGB separation, scan lines, digital corruption aesthetic
 
-The skill matches your content to the best style automatically. Data-heavy content gets an editorial style. A product launch gets Bold Signal. A corporate report gets Swiss Clean. You can also ask for a specific mood and the skill will narrow it down.
+The skill matches your content to the best style automatically. Data-heavy content gets an editorial style. A product launch gets Bold Signal. A tech talk gets Neo-Futurism. You can also ask for a specific mood and the skill will narrow it down.
 
-### 50 Font References
+### 49 Font References
 
 Curated heading + body + monospace combinations (including the Geist family) loaded via Google Fonts. The skill cross-references fonts with styles for the best pairing.
 
@@ -56,11 +60,12 @@ Curated heading + body + monospace combinations (including the Geist family) loa
 
 Not just static slides — the skill can add:
 
-- Entrance animations and slide transitions
+- Entrance animations and smooth transitions
 - WebGL shader backgrounds (noise fields, aurora bands, particle drift)
 - GSAP-powered staggered reveals and counter animations
 - CSS techniques like frosted glass, neon glow, text stroke, clip-path reveals
 - Three.js 3D particle fields and scenes
+- Style-specific effects: perspective grids (Synthwave), halftone dots (Risograph), scan lines (Glitch Art), gradient mesh (Apple Liquid Glass)
 
 Effects are matched to the style. A minimalist deck gets subtle fades. A futuristic deck gets particle fields. A corporate deck gets nothing extra — restraint is a feature.
 
@@ -92,14 +97,16 @@ Design decisions (style, colors, fonts, animations) are inferred from your conte
 A single `.html` file that:
 
 - Opens in any modern browser
-- Uses Reveal.js for navigation, keyboard controls, and speaker notes
-- Loads fonts and libraries from CDN — no local dependencies
+- Zero dependencies — no framework, pure HTML/CSS/JS with CSS scroll-snap
+- Loads fonts and libraries from CDN only when needed
 - Contains all styles and scripts inline — fully self-contained
-- Supports presenter mode (press `S` for speaker notes)
+- Natively responsive — works on desktop, tablet, and mobile
+- Keyboard and touch navigation built-in
+- Fragment support (click-to-reveal) for talks and lectures
 
 ## Design Polish
 
-The skill automatically installs [impeccable.style](https://impeccable.style/) on first run. Every deck gets a final design upgrade with `/polish`, `/animate`, and `/delight` before delivery — fixing alignment, enhancing motion, and adding moments of personality.
+After building, the skill can run a final design upgrade with `/polish`, `/animate`, and `/delight` — fixing alignment, enhancing motion, and adding moments of personality.
 
 ## License
 

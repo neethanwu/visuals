@@ -12,7 +12,7 @@ CDN tag is in `libraries.md`. After loading, initialize:
 
 ```js
 lucide.createIcons();
-Reveal.on('slidechanged', () => lucide.createIcons());
+// Call after DOM ready and after any dynamic content changes
 ```
 
 ### Usage
@@ -92,10 +92,10 @@ Syntax-highlighted code for technical slides.
 
 ### Setup
 
-CDN tags are in `libraries.md`. Add the Highlight.js plugin to Reveal.js init:
+CDN tags are in `libraries.md`. Initialize after DOM is ready:
 
 ```js
-Reveal.initialize({ plugins: [RevealHighlight] });
+hljs.highlightAll();
 ```
 
 ### Theme mapping per style
@@ -111,33 +111,31 @@ Reveal.initialize({ plugins: [RevealHighlight] });
 ### Usage in slides
 
 ```html
-<section>
-  <pre><code class="language-javascript" data-trim data-line-numbers>
+<pre><code class="language-javascript">
 function greet(name) {
   return `Hello, ${name}!`;
 }
-  </code></pre>
-</section>
+</code></pre>
 ```
 
 ### Styling code blocks to match the deck
 
 ```css
-.reveal pre {
+pre {
   width: 90%;
   margin: 0 auto;
   box-shadow: none;
   border: 1px solid var(--border-color);
   border-radius: 0; /* match style — 0 for brutalist/swiss, 4-8px for warm */
 }
-.reveal code {
+code {
   font-family: var(--mono-font);
   font-size: 16px;
   line-height: 1.6;
   padding: 24px;
 }
 /* Line numbers */
-.reveal pre code .hljs-ln-numbers {
+pre code .hljs-ln-numbers {
   color: var(--text-secondary);
   opacity: 0.5;
   padding-right: 16px;
@@ -170,21 +168,19 @@ mermaid.initialize({
   }
 });
 
-Reveal.on('ready', () => mermaid.run());
-Reveal.on('slidechanged', () => mermaid.run());
+// Run after DOM is ready
+mermaid.run();
 ```
 
 ### Usage in slides
 
 ```html
-<section>
-  <div class="mermaid">
-    graph LR
-      A[Research] --> B[Design]
-      B --> C[Build]
-      C --> D[Ship]
-  </div>
-</section>
+<div class="mermaid">
+  graph LR
+    A[Research] --> B[Design]
+    B --> C[Build]
+    C --> D[Ship]
+</div>
 ```
 
 ### Theme mapping per style
@@ -200,11 +196,11 @@ Reveal.on('slidechanged', () => mermaid.run());
 
 ```css
 /* Override Mermaid's default sizing */
-.reveal .mermaid {
+.mermaid {
   max-width: 80%;
   margin: 0 auto;
 }
-.reveal .mermaid svg {
+.mermaid svg {
   max-height: 60vh;
 }
 /* Match node text to deck typography */

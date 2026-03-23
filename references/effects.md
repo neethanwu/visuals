@@ -1,14 +1,14 @@
 # Visual Effects Reference
 
-Self-contained visual effects for slide backgrounds. All effects run in a `<canvas>` element positioned behind slide content. No build step required — pure inline JavaScript/GLSL.
+Self-contained visual effects for slide backgrounds. All effects run in a `<canvas>` element positioned behind slide content, or as pure CSS overlays. No build step required — pure inline JavaScript/GLSL.
 
 ## When to Use Effects
 
 | Effect level | When | Styles |
 |---|---|---|
-| **None** | Restrained styles, content-focused decks | Minimalist, Editorial Calm, Swiss Clean, Conceptual Art |
-| **CSS only** | Subtle texture or gradient | Editorial styles, Corporate, Warm styles |
-| **Canvas/WebGL** | Immersive, atmospheric, futuristic | Neo-Futurism, Dark Classy, Color Field, Op Art |
+| **None** | Restrained styles, content-focused decks | Minimalist, Editorial Calm, Swiss Clean, Conceptual Art, Blueprint |
+| **CSS only** | Subtle texture or gradient | Editorial styles, Corporate, Warm styles, Risograph, Pop Art |
+| **Canvas/WebGL** | Immersive, atmospheric, futuristic | Neo-Futurism, Dark Classy, Color Field, Synthwave, Glitch Art, Apple Liquid Glass |
 
 **Rule: If the style's design principles say "no decoration" or "typography only," do not add effects.**
 
@@ -77,13 +77,11 @@ Self-contained visual effects for slide backgrounds. All effects run in a `<canv
 
 ### Setup Pattern
 
-All canvas effects follow this pattern. Place the canvas behind Reveal.js slides:
+All canvas effects follow this pattern. Place the canvas behind the slides:
 
 ```html
 <canvas id="bg-effect" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
-<div class="reveal" style="position:relative;z-index:1;">
-  <!-- slides -->
-</div>
+<!-- Slides need position:relative;z-index:1 -->
 
 <script>
   const canvas = document.getElementById('bg-effect');
@@ -276,6 +274,80 @@ requestAnimationFrame(animate);
 ```
 **Good for:** Neo-Futurism, Bauhaus Digital
 
+### Scan Line Overlay (CSS — for Glitch Art, Synthwave)
+
+```css
+.slide-bg-scanlines::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+```
+**Good for:** Glitch Art (mandatory), Synthwave (optional, low opacity)
+
+### Halftone Dot Texture (CSS — for Risograph, Pop Art)
+
+```css
+.slide-bg-halftone::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle, var(--halftone-color, rgba(227,52,47,0.12)) 1px, transparent 1px);
+  background-size: 6px 6px;
+  pointer-events: none;
+  z-index: 0;
+}
+```
+**Good for:** Risograph (mandatory), Pop Art (on color blocks)
+
+### Perspective Grid (CSS — for Synthwave)
+
+```css
+.perspective-grid {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50vh;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,42,109,0.15) 0px, transparent 1px, transparent 60px),
+    repeating-linear-gradient(0deg, rgba(255,42,109,0.1) 0px, transparent 1px, transparent 40px);
+  transform: perspective(400px) rotateX(60deg);
+  transform-origin: bottom;
+  z-index: 0;
+}
+```
+**Good for:** Synthwave (title and closing slides)
+
+### Animated Gradient Mesh (CSS — for Apple Liquid Glass)
+
+```css
+@keyframes meshShift {
+  0%, 100% { background-position: 0% 50%, 100% 50%, 50% 0%; }
+  33% { background-position: 100% 0%, 0% 100%, 50% 100%; }
+  66% { background-position: 50% 100%, 50% 0%, 0% 50%; }
+}
+.glass-bg {
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(100, 100, 255, 0.3) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(200, 100, 255, 0.2) 0%, transparent 40%),
+    radial-gradient(ellipse at 50% 80%, rgba(100, 200, 255, 0.2) 0%, transparent 50%),
+    linear-gradient(135deg, #1a1a2e, #2d1b4e, #0d2137);
+  background-size: 200% 200%, 200% 200%, 200% 200%, 100% 100%;
+  animation: meshShift 20s ease infinite;
+}
+```
+**Good for:** Apple Liquid Glass (mandatory — glass panels need a rich background)
+
 ## Style-to-Effect Mapping
 
 | Style | Recommended effect | Level |
@@ -311,11 +383,17 @@ requestAnimationFrame(animate);
 | p-swiss-clean | None | — |
 | p-minimal-corporate | Subtle grain (dark slides only) | CSS |
 | p-brutalist-luxury-v2 | Grain texture | CSS |
+| risograph | Halftone dot texture | CSS |
+| synthwave | Perspective grid + scan lines (optional) | CSS |
+| apple-liquid-glass | Animated gradient mesh (mandatory) | CSS |
+| pop-art | Halftone dots on color blocks | CSS |
+| glitch-art | Scan lines + RGB split (on text via text-shadow) | CSS |
+| blueprint | Grid overlay (always present) | CSS |
 
 ## Performance Notes
 
 - All canvas effects should check `requestAnimationFrame` availability
-- Pause animations on hidden slides: `Reveal.on('slidechanged', ...)` to toggle
+- Pause canvas animations when slides are not visible using IntersectionObserver
 - WebGL shaders run on GPU — they don't block the main thread
 - Keep particle counts under 100 for smooth 60fps
 - Use `will-change: transform` on animated CSS elements

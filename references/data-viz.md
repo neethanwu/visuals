@@ -166,19 +166,25 @@ new Chart(canvas, {
 
 ### Rendering Charts on Slide Entry
 
-Charts should render when their slide becomes visible, not on page load:
+Charts should render when their slide becomes visible, not on page load. Use IntersectionObserver:
 
 ```js
 const chartInstances = {};
 
-Reveal.on('slidechanged', event => {
-  const canvases = event.currentSlide.querySelectorAll('canvas[data-chart]');
-  canvases.forEach(canvas => {
-    const id = canvas.id;
-    if (chartInstances[id]) return; // already rendered
-    chartInstances[id] = new Chart(canvas, JSON.parse(canvas.dataset.chart));
+const chartObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const canvases = entry.target.querySelectorAll('canvas[data-chart]');
+      canvases.forEach(canvas => {
+        const id = canvas.id;
+        if (chartInstances[id]) return; // already rendered
+        chartInstances[id] = new Chart(canvas, JSON.parse(canvas.dataset.chart));
+      });
+    }
   });
-});
+}, { threshold: 0.3 });
+
+document.querySelectorAll('.slide').forEach(s => chartObserver.observe(s));
 ```
 
 ## D3.js
@@ -190,7 +196,7 @@ CDN tag is in `libraries.md`.
 - Custom axis treatments (e.g., editorial-style axes with no gridlines, just ticks)
 - Bespoke chart types (slope charts, bump charts, lollipop charts)
 - Annotated visualizations with callouts and labels positioned precisely
-- Animated data transitions synced to Reveal.js slide changes
+- Animated data transitions synced to slide visibility changes
 - Treemaps, force-directed graphs, geographic maps
 
 ### Simple D3 Bar Chart (styled)
